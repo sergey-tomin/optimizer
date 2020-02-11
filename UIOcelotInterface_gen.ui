@@ -623,6 +623,9 @@
               <property name="toolTip">
                <string>Scales the step size by this factor</string>
               </property>
+              <property name="locale">
+               <locale language="English" country="UnitedStates"/>
+              </property>
               <property name="decimals">
                <number>3</number>
               </property>

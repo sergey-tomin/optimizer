@@ -299,6 +299,7 @@ class Ui_Form(object):
         font = QtGui.QFont()
         font.setPointSize(18)
         self.sb_scaling_coef.setFont(font)
+        self.sb_scaling_coef.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.sb_scaling_coef.setDecimals(3)
         self.sb_scaling_coef.setMinimum(0.0)
         self.sb_scaling_coef.setMaximum(999.0)

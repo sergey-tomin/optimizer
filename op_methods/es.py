@@ -20,7 +20,7 @@ class ESMin(Minimizer):
         self.ES.bounds = self.bounds
         self.ES.max_iter = self.max_iter
         self.ES.opt_ctrl = self.opt_ctrl
-        #self.ES.norm_coef = self.norm_coef
+        self.ES.norm_coef = self.norm_coef
         self.ES.minimize(error_func, x)
         return
 
@@ -97,7 +97,7 @@ class ES_min:
             pnorm = self.ES_normalize(pnew)
 
             # Do the ES update
-            pnorm = pnorm + self.dtES*np.cos(self.wES*step*self.dtES+self.kES*cost_val)*(self.alphaES*self.wES)**0.5
+            pnorm = pnorm + self.dtES*np.cos(self.wES*step*self.dtES + self.kES * cost_val) * (self.alphaES*self.wES)**0.5
             
             # Check that parameters stay within normalized range [-1, 1]
             for jn in np.arange(self.nparams):
