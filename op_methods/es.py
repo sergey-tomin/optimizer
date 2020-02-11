@@ -15,10 +15,12 @@ class ESMin(Minimizer):
         super(ESMin, self).__init__()
         self.ES = ES_min()
 
+
     def minimize(self, error_func, x):
         self.ES.bounds = self.bounds
         self.ES.max_iter = self.max_iter
-        self.ES.norm_coef = self.norm_coef
+        self.ES.opt_ctrl = self.opt_ctrl
+        #self.ES.norm_coef = self.norm_coef
         self.ES.minimize(error_func, x)
         return
 
@@ -29,8 +31,7 @@ class ES_min:
 
 
         w0 = 500.0
-
-
+        self.opt_ctrl = None
         self.kES = 0.5
         self.alphaES = 1
         self.w0 = w0
@@ -85,7 +86,10 @@ class ES_min:
         pnew = x
 
         for step in np.arange(self.max_iter):
-            
+
+            if self.opt_ctrl is not None and self.opt_ctrl.kill:
+                # kill the minimization from external process
+                return
             print("step number: ", step)
 
                
