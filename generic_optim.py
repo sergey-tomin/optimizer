@@ -64,7 +64,7 @@ from op_methods.rcds import *
 from op_methods.custom_minimizer import *
 from op_methods.powell import *
 from op_methods.gp_sklearn import *
-
+from op_methods.cobyla import *
 
 from stats import stats
 
@@ -124,6 +124,7 @@ class OcelotInterfaceWindow(QFrame):
         self.name_powell = "Powell"
         self.name_gauss_gpy = "GP GPy"
         self.name_rcds = "RCDS"
+        self.name_cobyla = "COBYLA"
         # self.name4 = "Conjugate Gradient"
         # self.name5 = "Powell's Method"
         # switch of GP and custom Mininimizer
@@ -134,6 +135,7 @@ class OcelotInterfaceWindow(QFrame):
         self.ui.cb_select_alg.addItem(self.name_es)
         self.ui.cb_select_alg.addItem(self.name_powell)
         self.ui.cb_select_alg.addItem(self.name_rcds)
+        self.ui.cb_select_alg.addItem(self.name_cobyla)
         #self.ui.cb_select_alg.addItem(self.name_gauss_gpy)
         # if sklearn_version >= "0.18":
         #     self.ui.cb_select_alg.addItem(self.name_gauss_sklearn)
@@ -396,6 +398,8 @@ class OcelotInterfaceWindow(QFrame):
             minimizer = Powell()
         elif current_method == self.name_rcds:
             minimizer = RCDS()
+        elif current_method == self.name_cobyla:
+            minimizer = Cobyla()
         #simplex Method
         else:
             minimizer = Simplex()
@@ -472,11 +476,14 @@ class OcelotInterfaceWindow(QFrame):
 
         # configure the Minimizer
         minimizer.mi = self.mi
+        minimizer.norm_coef = self.ui.sb_isim_rel_step.value() / 100.
+        minimizer.scaling_coef = self.ui.sb_scaling_coef.value()
+
         if minimizer.__class__ in [GaussProcess, GaussProcessSKLearn]:
             minimizer.seed_iter = self.ui.sb_seed_iter.value()
             minimizer.seed_timeout = self.ui.sb_tdelay.value()
             minimizer.hyper_file = self.hyper_file
-            minimizer.norm_coef = self.ui.sb_isim_rel_step.value() / 100.
+
 
             if self.ui.cb_use_isim.checkState():
                 if self.ui.cb_use_isim.checkState():
@@ -518,14 +525,10 @@ class OcelotInterfaceWindow(QFrame):
                             dev.istep = d_lims * rel_step / 100.
 
         elif minimizer.__class__ in [ESMin]:
-
-
             bounds = []
             for dev in self.devices:
                 bounds.append(dev.get_limits())
             minimizer.bounds = bounds
-
-            minimizer.norm_coef = self.ui.sb_isim_rel_step.value() / 100.
 
         elif minimizer.__class__ == CustomMinimizer:
             minimizer.dev_steps = []
@@ -543,15 +546,13 @@ class OcelotInterfaceWindow(QFrame):
         # Optimizer initialization
         self.opt = mint.Optimizer()
 
-        self.opt.scaling_coef = self.ui.sb_scaling_coef.value()
-        logger.debug("Using Scaling Coeficient of: " + str(self.opt.scaling_coef))
+        logger.debug("Using Scaling Coeficient of: " + str(minimizer.scaling_coef))
 
         # solving minimization or maximization problem
         self.opt.maximization = self.ui.rb_maximize.isChecked()
 
         if self.ui.cb_select_alg.currentText() in [self.name_simplex_norm]:
             self.opt.normalization = True
-            self.opt.norm_coef = self.ui.sb_isim_rel_step.value()*0.01
         # Option - set best solution after optimization or not
         self.opt.set_best_solution = self.ui.cb_set_best_sol.checkState()
 
