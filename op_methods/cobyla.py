@@ -25,6 +25,8 @@ class Cobyla(Minimizer):
             if self.norm_scales[idx] is not None:
                 continue
             delta = dev.get_delta()
+            if delta == 0:
+                delta = 1
             self.norm_scales[idx] = delta
         self.norm_scales = np.array(self.norm_scales)
 
@@ -32,16 +34,18 @@ class Cobyla(Minimizer):
 
     def calc_constraints(self):
 
-        def make_high_lamb(indx, b):
+        def make_lambda(indx, b):
             return lambda x: x[indx] + b
 
         cons = []
         for idx, dev in enumerate(self.devices):
+            if dev.get_delta() == 0:
+                continue
             high = (dev.high_limit - self.x_init[idx])/self.norm_scales[idx]/self.norm_coef/self.scaling_coef
-            con = {'type': 'ineq', 'fun': make_high_lamb(idx, -high)}
+            con = {'type': 'ineq', 'fun': make_lambda(idx, -high)}
             cons.append(con)
             low = (dev.low_limit - self.x_init[idx]) / self.norm_scales[idx]/self.norm_coef/self.scaling_coef
-            con = {'type': 'ineq', 'fun': make_high_lamb(idx, -low)}
+            con = {'type': 'ineq', 'fun': make_lambda(idx, -low)}
             cons.append(con)
 
         return cons
